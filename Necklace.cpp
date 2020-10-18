@@ -1,111 +1,115 @@
-#include                                                                <string>
-#include                                                              <iostream>
+/*-*-C++-*-*////////////////////////////////////////////////////////////////////
+#include /*                                                        ***/ <cstdio>
+#include /*                                                        ***/ <string>
+#include /*                                                        */ <iostream>
+#include /*                                                        ***/ <vector>
+#include /*                                                        */ <iterator>
+#include /*                                                        ****/ <tuple>
 using namespace                                                             std;
 ////////////////////////////////////////////////////////////////////////////////
 ////----____oooo````;;;;,,,,....''''----    ....////---->>>>!!!!^^^^    ____%%%%
 string::iterator next(string::iterator it, string &s)
-{ /**/
-  if( ++it == s.end()) it = s.begin();
-  return it; }
+{ /* Implement circular iteration by overloading std::next */
+  return ( ++it == s.end() )? s.begin(): it; }
   
 string::iterator prev(string::iterator it, string &s)
 { /* oo */
-  if( it == s.begin()) it = s.end(); // neva beginze
-  return --it; }
+  return ( it-- == s.begin() )? (s.end() - 1): it; /* neva beginze */ }
 
-////////////////////////////////////////////////////////////////////////////////
-int cont(const string::iterator &cut, string &s)
-{ /* Count number of same beads on both ends. */
-  const string::iterator put = prev(cut, s); // note: there is std::prev!!
-  char f = *cut; /* forward */
-  char b = *put; /* bacward */
-  int cx = 2; // conter
-  for(string::iterator it = cut; 
-      *(it = next(it, s)) == f; 
-      ++cx) {}
-  for(string::iterator it = put;
-      *(it = prev(it, s)) == b;
-      ++cx) {}
-  return cx; }
-
-    ////    ----    ````    ,,,,    ____    ====    ||||    """"    ****    ;;;;
-pair<int,int> junction(string &s)
-{ /* Apply cont to al {r,b} junctions, return maximum cont and position. */
-  int mcont = 0; // maximum count
-  int m = -1;    // mcont position
-  for (string::iterator it = s.begin(); it != s.end(); ++it) {
-    if (*it != *prev(it, s)) { // junction
-      int cx = cont(it, s);
-      if( cx > mcont) {
-        m = it - s.begin();
-        mcont = cx; }}}
-  if (m == -1) { // there are no junctions
-    mcont = s.size(); }
-  return {m, mcont}; }
-
-////    ----    <<<<    ****    ||||    ````    ,,,,    ....    ;;;;    >>>>____
-#include <vector>
-vector<int> extract_wpos( const string &s )
-{ /* Get white positions from s. */
+////    ----    <<<<    ****    ||||    ````    ,,,,    ....    ;;;;    >>>>
+vector<int> extract_wpos(const string &s)
+{ /* Extract white positions from s. */
   vector<int> wpos;
   int siz = s.size();
   for (int i(0); i < siz; ++i) {
-    if (s[i] == 'w') {
-      wpos.push_back(i); }}
+    if( s[i] == 'w' ){ wpos.push_back(i); }}
   return wpos; }
 
 ////----____````////====,,,,''''////####....""""////eeee    ||||////&&&&____''''
-#include <iterator>
 template <typename T>
-ostream &operator<<(ostream &out, vector<T> vec)
+ostream &operator<<(ostream &out, const vector<T> &vec)
 { /* Yea! */
-  copy(vec.begin(), vec.end(), ostream_iterator<T>(cout," "));
+  copy(vec.begin(), vec.end(), ostream_iterator<T>(out, " "));
   return out; }
 
 ////////////////////////////////////////////////////////////////////////////////
 vector<string> paint(const string &s)
-{ /* get all strings from template s */
+{ /* Use w's in s to generate all possible coloured necklaces. */
   vector<int> wpos = extract_wpos(s);
-  int wsiz = wpos.size();
-  int car = 1 << wsiz; // cardinality
-  vector<string> stk;
+  int wsiz = wpos.size(); // number of w's
+  int car  = 1 << wsiz;   // cardinality of the set of all wsiz subsets
+  vector<string> stk;     // buffer 
+  /* [Ok] let's have a string s = wrbw, than wpos should be [0,3] and
+   * car = 4, now we have to match the 1-bits in 0 <= bits < car to red
+   * and 0-bits to b in the corresponding w's:
+   * wpos: 0 '   '   ' 3 
+   * s   : w ' r ' b ' w
+   * bits: 0 '   '   ' 0 : 0(brbb)
+   *       1 '   '   ' 0 : 1(rrbb)
+   *       0 '   '   ' 1 : 2(brbr)
+   *       1 '   '   ' 1 : 3(rrbr)
+   */
   for (int bits = 0; bits < car; ++bits) {
     string t = s; /* copy */
-    /* match 1's with red and 0's with blue: */
     for (int j = 0; j < wsiz; ++j) {
       int p = wpos[j];
-      if ( bits & ( 1 << j )) {
-        t[p] = 'r'; }
-      else {
-        t[p] = 'b'; }}
+      if( bits & (1 << j) ){
+        t[p] = 'r'; 
+      } else {
+        t[p] = 'b'; 
+      }}
     stk.push_back(t); }
   return stk; }
 
+////////////////////////////////////////////////////////////////////////////////
+int cont(const string::iterator &fwd, string &s)
+{ /* Count number of same beads on both, fwd and bwd ends. */
+  int x = 2; // conter
+  const string::iterator &bwd = prev(fwd, s); 
+  for(string::iterator it = fwd; *(it = next(it, s)) == *fwd; ++x)
+    ;
+  for(string::iterator it = bwd; *(it = prev(it, s)) == *bwd; ++x)
+    ;
+  return x; }
+
+    ////    ----    ````    ,,,,    ____    ====    ||||    """"    ****    ;;;;
+pair<int, int> junction(string &s)
+{ /* Apply cont to all rb or br junctions, return maximum cont and position. */
+  int mx = 0; // maximum count
+  int m = -1; // mx position
+  for (auto it = s.begin(); it != s.end(); ++it) {
+    if (*it != *prev(it, s)) { // junction
+      int x = cont(it, s);
+      if( x > mx ){
+        m = it - s.begin();
+        mx = x; }}}
+  if( m == -1 ){ // there are no junctions
+    mx = s.size(); }
+  return {mx, m}; }
+
 ////    ----****____\\\\----    ****____  * ____ *  ==== *  ````*   ====  * ====
-#include <tuple>
-tuple<int,int,string> necklace(string &s)
-{ /**/
+tuple<int, int, string> Necklace(string &s)
+{ /* Return beads counter, cut position and necklace string. */
   vector<string> stk = paint(s);
-  int stksiz = stk.size();
-  int cont =  0;
-  int j    = -1;
-  int i    = 0;
-  for (int k = 0; k < stksiz; ++k) {
-    auto [m, mcont] = junction(stk[k]);
-    if (cont < mcont) {
-      cont = mcont;
+  int cont(0);
+  int j;
+  vector<string>::iterator p;
+  for (auto it = stk.begin(); it != stk.end(); ++it) {
+    auto [mx, m] = junction(*it);
+    if( cont < mx ){
+      cont = mx;
       j = m;
-      i = k; }}
-  return {cont, j, stk[i]}; }
+      p = it; }}
+  return {cont, j, *p}; }
 
 ////////////////////////////////////////////////////////////////////////////////
 int main(int argc, char *argv[])
 { /* yea! */
-  string s = "brrwwbwrwrrw";
+  string s = "rwbwwbbbrrwwbrr";
   puts(s.c_str());
-  auto [cont, j, t] = necklace(s);
-  cout << cont << ' ' << j << ' ' << t; 
+  auto [cont, j, Nec] = Necklace(s);
+  cout << cont << ' ' << j << ' ' << Nec; 
   puts(""); }
 
 /////////////////////////////////////////////////////////////////////////// log:
-//
+// xògu neE
