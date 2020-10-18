@@ -65,20 +65,20 @@ vector<string> paint(const string &s)
 int cont(const string::iterator &fwd, string &s)
 { /* Count number of same beads on both, fwd and bwd ends. */
   int x = 2; // conter
-  const string::iterator &bwd = prev(fwd, s); 
-  for(string::iterator it = fwd; *(it = next(it, s)) == *fwd; ++x)
+  const string::iterator &bwd = ::prev(fwd, s); 
+  for(string::iterator it = fwd; *(it = ::next(it, s)) == *fwd; ++x)
     ;
-  for(string::iterator it = bwd; *(it = prev(it, s)) == *bwd; ++x)
+  for(string::iterator it = bwd; *(it = ::prev(it, s)) == *bwd; ++x)
     ;
   return x; }
 
     ////    ----    ````    ,,,,    ____    ====    ||||    """"    ****    ;;;;
 pair<int, int> junction(string &s)
-{ /* Apply cont to all rb or br junctions, return maximum cont and position. */
+{ /* Apply cont to all rb or br junctions, return maximum cont, and position. */
   int mx = 0; // maximum count
   int m = -1; // mx position
   for (auto it = s.begin(); it != s.end(); ++it) {
-    if (*it != *prev(it, s)) { // junction
+    if (*it != *::prev(it, s)) { // junction
       int x = cont(it, s);
       if( x > mx ){
         m = it - s.begin();
