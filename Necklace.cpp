@@ -74,7 +74,7 @@ int cont(const string::iterator &fwd, string &s)
 
     ////    ----    ````    ,,,,    ____    ====    ||||    """"    ****    ;;;;
 pair<int, int> junction(string &s)
-{ /* Apply cont to all rb or br junctions, return maximum cont, and position. */
+{ /* Apply cont to all rb or br junctions, return maximum cont and position. */
   int mx = 0; // maximum count
   int m = -1; // mx position
   for (auto it = s.begin(); it != s.end(); ++it) {
@@ -89,7 +89,7 @@ pair<int, int> junction(string &s)
 
 ////    ----****____\\\\----    ****____  * ____ *  ==== *  ````*   ====  * ====
 tuple<int, int, string> Necklace(string &s)
-{ /* Return beads counter, cut position and necklace string. */
+{ /* Return beads counter, cut position, and necklace string. */
   vector<string> stk = paint(s);
   int cont(0);
   int j;
