@@ -8,4 +8,6 @@ iz nice becoz [[ it'z ]] ***$***{***simple***},.
 
 ![](pix/journey.png)
 
+![](pix/biletcheta-i-karti.png)
+
 [Journey](https://youtu.be/-V3NN3hD3jU)
